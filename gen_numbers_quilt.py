@@ -41,6 +41,11 @@ if len(sys.argv) == 6:
 tile_w = quilt_w // tiles_h
 tile_h = quilt_h // tiles_v
 
+AREA_SPLIT = 3
+
+area_w = tile_w // AREA_SPLIT
+area_h = tile_h // AREA_SPLIT
+
 print('tile:', tile_w, tile_h)
   
 outimg = Image.new('RGB', (quilt_w, quilt_h))
@@ -48,7 +53,7 @@ outimg = Image.new('RGB', (quilt_w, quilt_h))
 tile_idx = 1
 tile_top = quilt_h - tile_h
 
-font = ImageFont.truetype('/usr/share/fonts/TTF/FreeSansBold.ttf', size=tile_h//4)
+font = ImageFont.truetype('/usr/share/fonts/TTF/FreeSansBold.ttf', size=tile_h//9)
 
 for j in range(tiles_v):
     
@@ -63,19 +68,35 @@ for j in range(tiles_v):
         draw = ImageDraw.Draw(tile_img)
         
         txt = str(tile_idx)
-        sz = draw.textsize(txt, font=font)
-        # Center
-        x = int(tile_w/2 - sz[0]/2)
-        y = int(tile_h/2 - sz[1]/2)
-        # Offset tile numbers so they don't overlap (makes them easier to distinguish)
+        txtsz = draw.textsize(txt, font=font)
+        
+        # Split the tile image into 3x3 areas, within each area we show the tile number
+        # once. The exact placement of each number within the area depends on the tile 
+        # number itself, as we expect number close in value to be shown concurrently
+        
         oidx = tile_idx % 9
-        x += ((oidx % 3) - 1) * tile_w/3
-        y += ((oidx // 3) - 1) * tile_h/3
-        # White outline
-        for xo in [-2,2]:
-            for yo in [-2,2]:
-                draw.text((x+xo, y+yo), txt, font=font, fill='white')
-        draw.text((x, y), txt, font=font, fill='black')
+        
+        for aj in range(AREA_SPLIT):
+            area_top = aj * area_h
+            
+            for ai in range(AREA_SPLIT):
+                area_left = ai * area_w
+                
+                # Centered in area
+                x = area_left + area_w/2 - txtsz[0]/2
+                y = area_top + area_h/2 - txtsz[1]/2
+                
+                # Offset based on tile index
+                x += ((oidx % AREA_SPLIT) - 1) * area_w/AREA_SPLIT
+                y += ((oidx // AREA_SPLIT) - 1) * area_h/AREA_SPLIT
+                
+                # White outline
+                for xo in [-2,2]:
+                    for yo in [-2,2]:
+                        draw.text((x+xo, y+yo), txt, font=font, fill='white')
+                
+                draw.text((x, y), txt, font=font, fill='black')
+                
         del draw
         
         outimg.paste(tile_img, (tile_left, tile_top))
