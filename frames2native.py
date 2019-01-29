@@ -20,7 +20,7 @@ some subtly different rounding as the formulas are not exactly the same
 """
 
 import sys, json
-from math import atan, cos, floor
+from math import floor
 from PIL import Image
 
 from calibration import Calibration
