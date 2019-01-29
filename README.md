@@ -8,8 +8,8 @@ usually in done a fragment shader.
 
 Scripts:
 
-`make_quilt.py`: Generate a standard quilt from a set of view images
-`gen_numbers_quilt.py`: Generates a quilt where each tile shows the view number. This can be used to (try to) understand how the individual views (and their pixels) are shown on the Looking Glass
-`quilt2native.py`: Takes a standard quilt and outputs a native image, based on a device's calibration values. This should match what the official LG tools do.
-`linquilt2native.py`: Takes a linear quilt (all tile images side-by-side, i.e. num vertical tiles = 1) and outputs a native image.
-`frames2native.py`: Reads a set of separate tile images and output a native image. 
+- `make_quilt.py`: Generate a standard quilt from a set of view images
+- `gen_numbers_quilt.py`: Generates a quilt where each tile shows the view number. This can be used to (try to) understand how the individual views (and their pixels) are shown on the Looking Glass
+- `quilt2native.py`: Takes a standard quilt and outputs a native image, based on a device's calibration values. This should match what the official LG tools do.
+- `linquilt2native.py`: Takes a linear quilt (all tile images side-by-side, i.e. num vertical tiles = 1) and outputs a native image.
+- `frames2native.py`: Reads a set of separate tile images and output a native image. 
