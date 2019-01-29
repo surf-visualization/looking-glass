@@ -59,8 +59,8 @@ def nextPowerOf2(n):
       
     return 1 << count
 
-#quilt_w = nextPowerOf2(quilt_w)
-#quilt_h = nextPowerOf2(quilt_h)
+quilt_w = nextPowerOf2(quilt_w)
+quilt_h = nextPowerOf2(quilt_h)
 print('Quilt size: %d x %d' % (quilt_w, quilt_h))
 
 outimg = Image.new('RGB', (quilt_w, quilt_h))
