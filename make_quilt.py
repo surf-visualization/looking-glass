@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Generate a numbered quilt image for checking viewpoints and crosstalk
+Take a set of view images and place them in a single standard quilt image.
 
 https://forum.lookingglassfactory.com/t/combining-32-views/501/2
 The views go from the bottom left as the leftmost view, to the top right being the furthest right
