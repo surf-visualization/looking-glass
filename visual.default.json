@@ -1,0 +1,16 @@
+{
+    "configVersion":"1.0",
+    "serial":"LKG-2K-01338",
+    "pitch":{"value":49.91},
+    "slope":{"value":5.8},
+    "center":{"value":0},
+    "viewCone":{"value":40.0},
+    "invView":{"value":0},
+    "verticalAngle":{"value":0.0},
+    "DPI":{"value":338.0},
+    "screenW":{"value":2560.0},
+    "screenH":{"value":1600.0},
+    "flipImageX":{"value":0.0},
+    "flipImageY":{"value":0.0},
+    "flipSubp":{"value":0.0}
+}
