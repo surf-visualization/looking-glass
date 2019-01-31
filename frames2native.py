@@ -1,23 +1,49 @@
 #!/usr/bin/env python
-"""
-Take a set of separate view images (i.e. the tiles that normally
-make up a quilt) and convert them to a "native" image that can be 
-displayed directly on a specific LG.
-
-The formulas derive from the concept of using a linear quilt,
-where all view images are placed side-by-side, i.e. with only 1 
-tile vertically. This simplifies the formulas quite a bit and is
-conceptually slightly easier as a 1D tile index becomes the same
-as the view index.
-
-Partly based on https://github.com/lonetech/LookingGlass/blob/master/quiltshader.glsl
-
-XXX This currently doesn't output exactly matching native images
-compared to linquilt2native.py and quilt2native.py (seems to be an 
-offset in views used). Haven't figured out why exactly yet, may be 
-some subtly different rounding as the formulas are not exactly the same
-(although they're derived from linquilt2native.py)
-"""
+# 
+# Take a set of separate view images (i.e. the tiles that normally
+# make up a quilt) and convert them to a "native" image that can be 
+# displayed directly on a specific LG.
+# 
+# The formulas derive from the concept of using a linear quilt,
+# where all view images are placed side-by-side, i.e. with only 1 
+# tile vertically. This simplifies the formulas quite a bit and is
+# conceptually slightly easier as a 1D tile index becomes the same
+# as the view index.
+# 
+# Partly based on https://github.com/lonetech/LookingGlass/blob/master/quiltshader.glsl
+# (for which no license seems to be specified)
+# 
+# XXX This currently doesn't output exactly matching native images
+# compared to linquilt2native.py and quilt2native.py (seems to be an 
+# offset in views used). Haven't figured out why exactly yet, may be 
+# some subtly different rounding as the formulas are not exactly the same
+# (although they're derived from linquilt2native.py)
+# 
+#
+# Copyright (c) 2019, SURFsara BV
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of SURFsara BV nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL SURFSARA BV BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys, json
 from math import floor
