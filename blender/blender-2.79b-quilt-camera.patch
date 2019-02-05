@@ -1,6 +1,6 @@
-diff -ur /home/paulm/c/blender-2.79b/intern/cycles/kernel/kernel_camera.h /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/kernel/kernel_camera.h
---- /home/paulm/c/blender-2.79b/intern/cycles/kernel/kernel_camera.h	2018-03-23 16:22:25.000000000 +0100
-+++ /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/kernel/kernel_camera.h	2019-02-05 09:30:09.828856231 +0100
+diff -ur blender-2.79b/intern/cycles/kernel/kernel_camera.h blender-2.79b-lookingglass/intern/cycles/kernel/kernel_camera.h
+--- blender-2.79b/intern/cycles/kernel/kernel_camera.h	2018-03-23 16:22:25.000000000 +0100
++++ blender-2.79b-lookingglass/intern/cycles/kernel/kernel_camera.h	2019-02-05 09:30:09.828856231 +0100
 @@ -355,6 +355,153 @@
  #endif
  }
