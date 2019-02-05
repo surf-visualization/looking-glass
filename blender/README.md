@@ -1,6 +1,6 @@
 # Looking Glass quilt camera
 
-A patch for Blender 2.79b to hack the perspective camera so it supports rendering a Looking Glass 5x9 quilt directly (i.e. in one pass).
+A patch for Blender 2.79b to hack the perspective camera so it supports rendering a Looking Glass 5x9 quilt directly (i.e. in one pass). Note that you need to build Blender from source yourself if you want to use this patch.
 
 Note that this patch applies to the [source tarball](http://download.blender.org/source/blender-2.79b.tar.gz)
 of 2.79b, so not the latest git version of the 2.7 branch.
