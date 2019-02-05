@@ -20,8 +20,7 @@ When the quilt rendering is active a number of camera settings is misused to pas
 
 The above effectively disables actually using DOF in the rendering, even though that might be useful for generating visuals for the Looking Glass. However, there's not many other values set from the UI that are readable at the point in the Cycles code where this hooks into.
 
-The performance hit isn't too bad (XXX just remembered these are
-  times for a debug build, will need to rerun in release mode):
+The performance hit isn't too bad (RelWithDebInfo build):
 
 | Type | Time |
 | ---- | ---- |
