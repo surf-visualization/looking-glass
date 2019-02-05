@@ -1,0 +1,171 @@
+diff -ur /home/paulm/c/blender-2.79b/intern/cycles/kernel/kernel_camera.h /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/kernel/kernel_camera.h
+--- /home/paulm/c/blender-2.79b/intern/cycles/kernel/kernel_camera.h	2018-03-23 16:22:25.000000000 +0100
++++ /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/kernel/kernel_camera.h	2019-02-05 09:30:09.828856231 +0100
+@@ -355,6 +355,153 @@
+ #endif
+ }
+ 
++/* 
++Looking Glass quilt camera: render 45 views (in 5x9 tiles) in one frame,
++layed out as a LG quilt. This code replaces the regular blender perspective
++camera rendering when the number of DOF Blades (under the Camera settings) 
++is set to 3 or higher. So when blades <=2 you can still check how a single
++view looks (even though it won't match completely, due to the different
++aspect ratio of the full quilt versus a single view).
++
++When the quilt rendering is active a number of camera settings is misused
++to pass values to this code: 
++
++- The distance over which the camera is X-shifted over the range of views
++  is taken from the DOF Distance value. E.g. a value of 4 means the camera 
++  has an X shift of -2 for the left-most view and +2 for the right-most view.
++
++- The ratio of the Looking Glass being targeted needs to be set under
++  Aperture, value Rotation. For the standard LG it should be 2560/1600=1.6,
++  for the large model 3840/2160=1.7778
++
++- The field-of-view of the quilt camera is taken from the *Panoramic*
++  Field of View setting. So switch the camera type to Panoramic and change
++  the Field of View value, then switch the type back to Perspective.
++  
++The above effectively disables actually using DOF in the rendering, even
++though that might be useful for generating visuals for the Looking Glass.
++However, there's not many other values set from the UI that are readable
++at this point in the code. And moving it all to the underlying blender 
++and cycles camera structs and adding a real new camera type is a 
++bit involved with all the different types of camera structs 
++(although doable, I partly have a patch for 2.8 that does this).
++
++This is more of a proof-of-concept than anything else:
++
++- The number of tiles is hardcoded
++- Depth of field doesn't work 
++- Live cycles preview rendering of the quilt isn't really useful,
++  as you can't zoom in the viewport
++- Lots of stuff should be precomputed once, instead of for every ray,
++  but the performance hit shouldn't be too bad as we assume the number 
++  of primary rays shot here is easily dominated by all the secondary 
++  rays generated for surface shading, etc.
++- The ray differentials aren't correct, which might influence shading?
++
++04-02-2019
++Paul Melis, SURFsara
++<paul.melis@surfsara.nl>
++*/
++
++const int TILES_H = 5;
++const int TILES_V = 9;
++const int NUM_TILES = TILES_H*TILES_V;
++
++const float INV_NUM_TILES = 1.0f / NUM_TILES;
++const float INV_NUM_TILES_MINUS_ONE = 1.0f / (NUM_TILES-1);
++const float INV_TILES_H = 1.0f / TILES_H;
++const float INV_TILES_V = 1.0f / TILES_V;
++
++ccl_device void camera_sample_looking_glass_quilt(KernelGlobals *kg, float raster_x, float raster_y, float lens_u, float lens_v, ccl_addr_space Ray *ray)
++{
++	// Raster: X to the right, Y up 
++	// I.e. bottom-left pixel is (0,0)
++
++	const float &width = kernel_data.cam.width;
++	const float &height = kernel_data.cam.height;
++
++	// XXX most of these should precomputed once and stored with the camera settings,
++	// instead of being computed per ray...
++
++
++	const float SPREAD_X = kernel_data.cam.focaldistance;         				// Movement in X position over view range
++	const float LG_ASPECT = kernel_data.cam.bladesrotation / M_PI_F * 180.0f;	// Convert radians back to the degrees entered in the blender UI ;-)	
++	
++	const float HFOV = kernel_data.cam.fisheye_fov; 							// Unfortunately, Kernel Camera does not have the original lens value for the perspective camera	XXX get it from the projection matrix?
++	const float IMAGE_PLANE_WIDTH = 2.0f;
++	const float IMAGE_PLANE_HEIGHT = IMAGE_PLANE_WIDTH / LG_ASPECT;
++	const float IMAGE_PLANE_DISTANCE = 1.0f / tanf(HFOV/2.0f);
++
++	// Determine tile for this ray
++
++	const int tile_width = int(width * INV_TILES_H);
++	const int tile_height = int(width * INV_TILES_V);
++
++	// Same indexing as LG quilt, i.e. i positive to the right, j positive in upwards direction
++	const int tile_i = int(raster_x / tile_width);          
++	const int tile_j = int(raster_y / tile_height);
++	const int tile_idx = tile_j*TILES_H + tile_i;
++
++	// Determine raster position within tile
++	raster_x -= tile_i * tile_width;
++	raster_y -= tile_j * tile_height;
++
++	// Camera position in X depends on view index
++	float3 P = make_float3((1.0f*tile_idx*INV_NUM_TILES_MINUS_ONE - 0.5f)*SPREAD_X, 0, 0);
++
++	// Image plane position (image plane covers [-1,1] in horizontal direction)
++	// Note: Cycles uses a left-handed camera coordinate system, while Blender
++	// uses a right-handed one
++	float3 Pcamera = make_float3(
++		(raster_x / tile_width - 0.5f)*IMAGE_PLANE_WIDTH,
++		(raster_y / tile_height - 0.5f)*IMAGE_PLANE_HEIGHT,
++		IMAGE_PLANE_DISTANCE
++	);
++
++	// Ray direction
++	float3 D = Pcamera - P;
++
++	/* transform ray from camera to world */
++	Transform cameratoworld = kernel_data.cam.cameratoworld;
++
++#ifdef __CAMERA_MOTION__
++	if(kernel_data.cam.have_motion) {
++#  ifdef __KERNEL_OPENCL__
++		const MotionTransform tfm = kernel_data.cam.motion;
++		transform_motion_interpolate(&cameratoworld,
++		                             (const DecompMotionTransform*)&tfm,
++		                             ray->time);
++#  else
++		transform_motion_interpolate(&cameratoworld,
++		                             (const DecompMotionTransform*)&kernel_data.cam.motion,
++		                             ray->time);
++#  endif
++	}
++#endif
++
++	ray->P = transform_point(&cameratoworld, P);
++	ray->D = normalize(transform_direction(&cameratoworld, D));
++
++#ifdef __RAY_DIFFERENTIALS__
++	float3 Dcenter = transform_direction(&cameratoworld, D);
++
++	ray->dP = differential3_zero();
++	ray->dD.dx = normalize(Dcenter + float4_to_float3(kernel_data.cam.dx*5)) - normalize(Dcenter);  // XXX the factors are a hack, really need to look into these
++	ray->dD.dy = normalize(Dcenter + float4_to_float3(kernel_data.cam.dy*5)) - normalize(Dcenter);
++#endif
++
++#ifdef __CAMERA_CLIPPING__
++	/* clipping */
++	float nearclip = kernel_data.cam.nearclip;
++	ray->P += nearclip * ray->D;
++	ray->dP.dx += nearclip * ray->dD.dx;
++	ray->dP.dy += nearclip * ray->dD.dy;
++	ray->t = kernel_data.cam.cliplength;
++#else
++	ray->t = FLT_MAX;
++#endif
++}
++
+ /* Common */
+ 
+ ccl_device_inline void camera_sample(KernelGlobals *kg,
+@@ -411,7 +558,12 @@
+ 
+ 	/* sample */
+ 	if(kernel_data.cam.type == CAMERA_PERSPECTIVE)
+-		camera_sample_perspective(kg, raster_x, raster_y, lens_u, lens_v, ray);
++	{
++		if (kernel_data.cam.blades > 0.f)
++			camera_sample_looking_glass_quilt(kg, raster_x, raster_y, lens_u, lens_v, ray);
++		else
++			camera_sample_perspective(kg, raster_x, raster_y, lens_u, lens_v, ray);
++	}
+ 	else if(kernel_data.cam.type == CAMERA_ORTHOGRAPHIC)
+ 		camera_sample_orthographic(kg, raster_x, raster_y, lens_u, lens_v, ray);
+ 	else
