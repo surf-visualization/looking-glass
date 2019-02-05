@@ -1,9 +1,6 @@
-# Looking Glass quilt camera
+# Blender Looking Glass quilt camera
 
-A patch for Blender 2.79b to hack the perspective camera so it supports rendering a Looking Glass 5x9 quilt directly (i.e. in one pass). You will need to build Blender from source yourself if you want to use this patch.
-
-Note that this patch applies to the [source tarball](http://download.blender.org/source/blender-2.79b.tar.gz)
-of 2.79b, so not the latest git version of the 2.7 branch.
+A patch for Blender 2.79b to hack the perspective camera so it supports rendering a Looking Glass 5x9 quilt directly. I.e. in one pass, without having to render separate views and combine them.
 
 This code replaces the regular blender Perspective camera rendering when the number of DOF Blades (under the Camera settings) is set to 3 or higher. So when blades <=2 you can still check how a single view looks (even though it won't match completely, due to the different aspect ratio of the full quilt versus a single view).
 
@@ -40,5 +37,11 @@ This is more of a proof-of-concept than anything else:
 - Supports CPU rendering only
 - Supports Cycles rendering only
 - The ray differentials are probably not correct, which might influence shading
+
+## Patch
+
+Note that this patch applies to the [source tarball](http://download.blender.org/source/blender-2.79b.tar.gz)
+of 2.79b, so not the latest git version of the 2.7 branch.
+You will need to build Blender from source yourself if you want to use this patch. Tested on Linux when building with GCC 8.2.1 (you might need to apply `gcc8.patch` as well).
 
 Paul Melis, SURFsara (paul.melis@surfsara.nl)

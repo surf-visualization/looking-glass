@@ -1,0 +1,36 @@
+diff -ur /home/paulm/c/blender-2.79b/intern/cycles/util/util_sseb.h /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/util/util_sseb.h
+--- /home/paulm/c/blender-2.79b/intern/cycles/util/util_sseb.h	2018-03-23 16:22:25.000000000 +0100
++++ /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/util/util_sseb.h	2019-01-31 16:26:30.223640993 +0100
+@@ -116,7 +116,7 @@
+ __forceinline const sseb unpackhi( const sseb& a, const sseb& b ) { return _mm_unpackhi_ps(a, b); }
+ 
+ template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const sseb shuffle( const sseb& a ) {
+-	return _mm_shuffle_epi32(a, _MM_SHUFFLE(i3, i2, i1, i0));
++	return _mm_castsi128_ps(_mm_shuffle_epi32(a, _MM_SHUFFLE(i3, i2, i1, i0)));
+ }
+ 
+ template<> __forceinline const sseb shuffle<0, 1, 0, 1>( const sseb& a ) {
+diff -ur /home/paulm/c/blender-2.79b/intern/cycles/util/util_ssef.h /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/util/util_ssef.h
+--- /home/paulm/c/blender-2.79b/intern/cycles/util/util_ssef.h	2018-03-23 16:22:25.000000000 +0100
++++ /home/paulm/c/blender-2.79b-lookingglass/intern/cycles/util/util_ssef.h	2019-01-31 16:26:30.226974353 +0100
+@@ -603,7 +603,7 @@
+ template<size_t S1, size_t S2, size_t S3, size_t S4>
+ ccl_device_inline const ssef set_sign_bit(const ssef &a)
+ {
+-	return a ^ cast(ssei(S1 << 31, S2 << 31, S3 << 31, S4 << 31));
++	return cast(cast(a) ^ ssei(S1 << 31, S2 << 31, S3 << 31, S4 << 31));
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+diff -ur /home/paulm/c/blender-2.79b/intern/itasc/kdl/tree.hpp /home/paulm/c/blender-2.79b-lookingglass/intern/itasc/kdl/tree.hpp
+--- /home/paulm/c/blender-2.79b/intern/itasc/kdl/tree.hpp	2018-03-23 16:22:25.000000000 +0100
++++ /home/paulm/c/blender-2.79b-lookingglass/intern/itasc/kdl/tree.hpp	2019-01-31 16:23:04.028659789 +0100
+@@ -34,7 +34,7 @@
+     //Forward declaration
+     class TreeElement;
+     // Eigen allocator is needed for alignment of Eigen data types
+-    typedef std::map<std::string,TreeElement, std::less<std::string>, Eigen::aligned_allocator<std::pair<std::string, TreeElement> > > SegmentMap;
++    typedef std::map<std::string,TreeElement, std::less<std::string>, Eigen::aligned_allocator<std::pair<const std::string, TreeElement> > > SegmentMap;
+ 
+     class TreeElement
+     {
