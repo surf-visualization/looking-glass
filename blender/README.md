@@ -43,6 +43,6 @@ This is more of a proof-of-concept than anything else:
 
 Note that this patch applies to the [source tarball](http://download.blender.org/source/blender-2.79b.tar.gz)
 of 2.79b, so not the latest git version of the 2.7 branch.
-You will need to build Blender from source yourself if you want to use this patch. Tested on Linux when building with GCC 8.2.1 (you might need to apply `gcc8.patch` as well).
+You will need to build Blender from source yourself if you want to use this patch. Tested on Linux when building with GCC 8.2.1 (you might need to apply `blender279b-gcc8.patch` as well).
 
 Paul Melis, SURFsara (paul.melis@surfsara.nl)
